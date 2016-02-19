@@ -1,7 +1,7 @@
 module Lib where
 
 import Data.List (transpose)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, isNothing)
 
 data Player = Nought | Cross
   deriving (Read, Show, Eq)
@@ -53,3 +53,17 @@ diagonals brd = map extract [topLeft, topRight]
 opponent :: Player -> Player
 opponent Nought = Cross
 opponent Cross  = Nought
+
+nextBoards :: Board -> Player -> [Board]
+nextBoards brd pl = map makeMove emptyIdxs
+  where
+    makeMove n = fillCell brd n (Just pl)
+    emptyIdxs  = map snd $ filter (isNothing . fst) $ zip brd [0..maxIndex]
+    maxIndex   = boardSize * boardSize - 1
+
+fillCell :: Board -> Int -> Cell -> Board
+fillCell brd n cell
+  | n >= (boardSize * boardSize) = brd
+  | otherwise = before ++ [cell] ++ (drop 1 after)
+  where
+    (before, after) = splitAt n brd
