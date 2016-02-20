@@ -1,5 +1,6 @@
 module Lib where
 
+import Data.Function (on)
 import Data.List (findIndices, minimumBy, transpose)
 import Data.Maybe (isJust, isNothing)
 
@@ -17,6 +18,11 @@ makeBoard = map charToCell . take (boardSize * boardSize)
     charToCell 'o' = Just Nought
     charToCell 'x' = Just Cross
     charToCell _   = Nothing
+
+nextMove :: Board -> Player -> Board
+nextMove brd pl = minimumBy (compare `on` opponentScore) (nextBoards brd pl)
+  where
+    opponentScore brd' = scoreFor brd' (opponent pl)
 
 isWinFor :: Board -> Player -> Bool
 isWinFor brd pl = any winningSlice allSlices
