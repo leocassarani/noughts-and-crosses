@@ -1,6 +1,6 @@
 module Lib where
 
-import Data.List (transpose)
+import Data.List (findIndices, minimumBy, transpose)
 import Data.Maybe (isJust, isNothing)
 
 data Player = Nought | Cross
@@ -39,8 +39,7 @@ nextBoards :: Board -> Player -> [Board]
 nextBoards brd pl = map makeMove emptyIdxs
   where
     makeMove n = fillCell brd n (Just pl)
-    emptyIdxs  = map snd $ filter (isNothing . fst) $ zip brd [0..maxIndex]
-    maxIndex   = boardSize * boardSize - 1
+    emptyIdxs  = findIndices isNothing brd
 
 fillCell :: Board -> Int -> Cell -> Board
 fillCell brd n cell
