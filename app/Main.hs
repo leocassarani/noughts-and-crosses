@@ -17,7 +17,14 @@ playGame board shape
   | gameOver board = return ()
   | otherwise =
     let next = nextMove board shape
-    in  print next >> playGame next (opponent shape)
+    in  prettyPrint next >> playGame next (opponent shape)
 
 gameOver :: Board -> Bool
 gameOver brd = isWinFor brd Nought || isWinFor brd Cross || isDraw brd
+
+prettyPrint :: Board -> IO ()
+prettyPrint = putStrLn . map cellToChar
+  where
+    cellToChar (Just Nought) = 'o'
+    cellToChar (Just Cross)  = 'x'
+    cellToChar Nothing       = '_'
