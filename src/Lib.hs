@@ -10,7 +10,8 @@ data Shape = Nought | Cross
 type Cell = Maybe Shape
 type Board = [Cell]
 
-boardSize = 3
+boardSize  = 3
+emptyBoard = replicate (boardSize * boardSize) Nothing
 
 makeBoard :: String -> Board
 makeBoard = map charToCell . take (boardSize * boardSize)

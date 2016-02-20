@@ -10,7 +10,7 @@ main = getArgs >>= run
 run :: [String] -> IO ()
 run (board:shape:_) = playGame (makeBoard board) (read shape)
 run (board:_)       = playGame (makeBoard board) Nought -- Default to Nought
-run []              = putStrLn "Error: not enough arguments" >> exitFailure
+run []              = playGame emptyBoard        Nought
 
 playGame :: Board -> Shape -> IO ()
 playGame board shape
