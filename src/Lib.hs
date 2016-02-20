@@ -18,22 +18,45 @@ makeBoard = map charToCell . take (boardSize * boardSize)
     charToCell 'x' = Just Cross
     charToCell _   = Nothing
 
-isWinFor :: Player -> Board -> Bool
-isWinFor pl brd = any winningSlice allSlices
+isWinFor :: Board -> Player -> Bool
+isWinFor brd pl = any winningSlice allSlices
   where
     winningSlice = all (== Just pl)
     allSlices = rows brd ++ cols brd ++ diagonals brd
 
-isLossFor :: Player -> Board -> Bool
-isLossFor pl = isWinFor (opponent pl)
+isLossFor :: Board -> Player -> Bool
+isLossFor brd pl = isWinFor brd (opponent pl)
 
 isDraw :: Board -> Bool
-isDraw brd = isFull brd && notWin Nought && notWin Cross
+isDraw brd = isFull brd && noWin Nought && noWin Cross
   where
-    notWin pl = not (isWinFor pl brd)
+    noWin = not . isWinFor brd
 
 isFull :: Board -> Bool
 isFull = all isJust
+
+nextBoards :: Board -> Player -> [Board]
+nextBoards brd pl = map makeMove emptyIdxs
+  where
+    makeMove n = fillCell brd n (Just pl)
+    emptyIdxs  = map snd $ filter (isNothing . fst) $ zip brd [0..maxIndex]
+    maxIndex   = boardSize * boardSize - 1
+
+fillCell :: Board -> Int -> Cell -> Board
+fillCell brd n cell
+  | n >= (boardSize * boardSize) = brd
+  | otherwise = before ++ [cell] ++ (drop 1 after)
+  where
+    (before, after) = splitAt n brd
+
+scoreFor :: Board -> Player -> Int
+scoreFor brd pl
+  | isWinFor  brd pl = 1
+  | isLossFor brd pl = -1
+  | isDraw    brd    = 0
+  | otherwise        = -(minimum $ map opponentScore (nextBoards brd pl))
+  where
+    opponentScore brd' = scoreFor brd' (opponent pl)
 
 rows :: Board -> [[Cell]]
 rows brd = map row [0..boardSize-1]
@@ -53,17 +76,3 @@ diagonals brd = map extract [topLeft, topRight]
 opponent :: Player -> Player
 opponent Nought = Cross
 opponent Cross  = Nought
-
-nextBoards :: Board -> Player -> [Board]
-nextBoards brd pl = map makeMove emptyIdxs
-  where
-    makeMove n = fillCell brd n (Just pl)
-    emptyIdxs  = map snd $ filter (isNothing . fst) $ zip brd [0..maxIndex]
-    maxIndex   = boardSize * boardSize - 1
-
-fillCell :: Board -> Int -> Cell -> Board
-fillCell brd n cell
-  | n >= (boardSize * boardSize) = brd
-  | otherwise = before ++ [cell] ++ (drop 1 after)
-  where
-    (before, after) = splitAt n brd
